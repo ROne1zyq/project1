@@ -1,12 +1,12 @@
 #include <math.h>
 #define M_left1 10
 #define M_left2 11
-#define M_right1 12
-#define M_right2 13
-#define tl 3
-#define el 2
-#define tf 7
-#define ef 6
+#define M_right1 5
+#define M_right2 6
+#define tl 2
+#define el 3
+#define tf 13
+#define ef 12
 #define tr 8
 #define er 9
 
@@ -29,22 +29,21 @@ void setup() {
 }
 
 double USRead(int trig,int echo){
-  //pinMode(trig,OUTPUT);
+  pinMode(trig,OUTPUT);
   digitalWrite(trig,LOW);
   delayMicroseconds(2);
-  
   digitalWrite(trig,HIGH);
   delayMicroseconds(10);
   digitalWrite(trig,LOW);
-  //pinMode(echo,INPUT);
+  pinMode(echo,INPUT);
   double t=pulseIn(echo,HIGH);
-  double distance=t*0.0343/2;
+  double distance=t*0.0344/2;
   return distance;
 }
-void Forward(int v){
-  analogWrite(M_left1,v);
+void Forward(int vl, int vr){
+  analogWrite(M_left1,vl);
   analogWrite(M_left2,0);
-  analogWrite(M_right1,v);
+  analogWrite(M_right1,vr);
   analogWrite(M_right2,0);
 }
 void Backward(int v){
@@ -87,5 +86,10 @@ void turnright(){
   delay(10);
 }
 void loop() {
-    Serial.println(USRead(tl,el));
+  // while(1){
+  //   Serial.println(USRead(tf,ef));
+  //   delay(5);
+  // }
+    Forward(220,245);
+  
 }
