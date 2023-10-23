@@ -1,19 +1,21 @@
 #include <math.h>
 #define M_left1 10
 #define M_left2 11
-#define M_right1 6
-#define M_right2 7
-#define tl 
-#define tr 
-#define tf 
-#define el 
-#define er 
-#define ef
+#define M_right1 5
+#define M_right2 6
+#define tl 2
+#define el 3
+#define tf 13
+#define ef 12
+#define tr 8
+#define er 9
+#define delta_l 5
 
-const int front_dis=40
-const int infinite_dis=100
+const int front_dis=40;
+const int infinite_dis=100;
 
-void setup() {
+void setup()
+{
   pinMode(M_left1, OUTPUT);
   pinMode(M_left2, OUTPUT);
   pinMode(M_right1, OUTPUT);
@@ -28,80 +30,70 @@ void setup() {
 
 }
 
-double USRead(int trig,int echo){
-  //pinMode(trig,OUTPUT);
+double USRead(int trig,int echo)
+{
+  pinMode(trig,OUTPUT);
   digitalWrite(trig,LOW);
   delayMicroseconds(2);
-  
   digitalWrite(trig,HIGH);
   delayMicroseconds(10);
   digitalWrite(trig,LOW);
-  //pinMode(echo,INPUT);
+  pinMode(echo,INPUT);
   double t=pulseIn(echo,HIGH);
-  double distance=t*0.0343/2;
+  double distance=t*0.0344/2;
   return distance;
 }
-void Forward(int v){
-  analogWrite(M_left1,v);
-  analogWrite(M_left2,0);
-  analogWrite(M_right1,v);
-  analogWrite(M_right2,0);
-}
-void Backward(int v){
-  analogWrite(M_left1,0);
-  analogWrite(M_left2,v);
-  analogWrite(M_right1,0);
-  analogWrite(M_right2,v);
-}
-void Stop(int duration){
-  analogWrite(M_left1,0);
-  analogWrite(M_left2,0);
-  analogWrite(M_right1,0);
-  analogWrite(M_right2,0);
-}
-void Left(int vhigh,int vlow){
-  analogWrite(M_left1,vlow);
-  analogWrite(M_left2,0);
-  analogWrite(M_right1,vhigh);
-  analogWrite(M_right2,0);
-}
-void Right(int vhigh,int vlow){
-  analogWrite(M_left1,vhigh);
-  analogWrite(M_left2,0);
-  analogWrite(M_right1,vlow);
-  analogWrite(M_right2,0);
-}
 
-void turnleft(){
-  analogWrite(M_left1,vlow);
-  analogWrite(M_left2,0);
-  analogWrite(M_right1,vhigh);
-  analogWrite(M_right2,0);
-  delay();
-}
-void turnright(){
-  analogWrite(M_left1,vhigh);
-  analogWrite(M_left2,0);
-  analogWrite(M_right1,vlow);
-  analogWrite(M_right2,0);
-  delay();
-}
-void loop() {
+void loop() 
+{
+  while(1)
+  {
     double lenl=USRead(tl, el);
     double lenr=USRead(tr, er);
     double lenf=USRead(tf, ef);
     double delta=abs(lenl-lenr);
-    
-    Forward(120);
-    if(lenf<front_dis){
-        while(1){
-          if(lenf>infinite_dis) break  //前方无障碍则退出过弯循环
-          else if(lenl<lenr&&delta>5){  //过弯右调   
-            turnright(120,80);
-          }
-          else if(lenl>lenr&&delta>5){  //过弯左调 
-            turnleft(120,80);
-          }
-        }
+    if(lenf>=100||lenr>=100) break;  //数据无效则重新开始循环（可能遇到撞墙时左右两侧都超100的情况，会死机，需要避免撞墙情况）
+    else if()
+    else if(lenr<15||lenl-lenr>30)  //右侧靠太近，左转
+    {
+      analogWrite(M_left2,0);//左转
+      analogWrite(M_left1,70);
+      analogWrite(M_right2,0);
+      analogWrite(M_right1,120); 
     }
+    else if(lenl<15||lenr-lenl>30)  //左侧靠太近，右转
+    {
+      analogWrite(M_left2,0);
+      analogWrite(M_left1,110);
+      analogWrite(M_right2,0);
+      analogWrite(M_right1,75); 
+    }
+    else  //左右侧均靠的不近，则正常行驶
+    {
+      if(lenf<30)  //前方有障碍，则准备转弯，判断左转还是右转
+      {
+        if(lenr>=lenl)  //右转
+        {
+          analogWrite(M_left2,0);
+          analogWrite(M_left1,110);
+          analogWrite(M_right2,0);
+          analogWrite(M_right1,75);
+        }
+        else  //左转
+        {
+          analogWrite(M_left2,0);//左转
+          analogWrite(M_left1,70);
+          analogWrite(M_right2,0);
+          analogWrite(M_right1,120); 
+        }
+      }
+      else  //前方无障碍，直行
+      {
+        analogWrite(M_left2,0);
+        analogWrite(M_left1,110);
+        analogWrite(M_right2,0);
+        analogWrite(M_right1,120); 
+      }
+    }
+  }
 }
